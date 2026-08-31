@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { ShoppingCart, Menu, X, Check, Globe, Search, FlaskConical, ArrowLeft, Mail, MessageSquare, Image as ImageIcon, Video, Building2 } from 'lucide-react';
+import { ShoppingCart, Menu, X, Check, Globe, Search, FlaskConical, ArrowLeft, MessageSquare, Building2 } from 'lucide-react';
 import logoJPEG from './assets/logo.jpeg';
 import productionVID from './assets/production.mp4';
 
@@ -55,7 +55,7 @@ const t = {
     about: "About Us",
     contact: "Contact Us",
     cart: "Cart",
-    checkout: "Proceed to Checkout",
+    checkout: "Proceed to Checkout via WhatsApp",
     total: "Total",
     empty: "Your cart is empty",
     addToCart: "Add to Cart",
@@ -75,10 +75,7 @@ const t = {
     contactTitle: "Get in Touch With Us",
     contactSub: "Our team is ready to assist you with any inquiries and orders.",
     whatsappLabel: "WhatsApp Direct Chat",
-    emailLabel: "Official Email Address",
-    facilityMediaTitle: "Inside Our Facility: Production & Cleanrooms",
-    photoPlaceholder: "Laboratory & Vial Production Photo Placeholder",
-    videoPlaceholder: "Cleanroom Synthesis Video Placeholder"
+    facilityMediaTitle: "Inside Our Facility: Production & Cleanrooms"
   },
   de: {
     hero: "Direkte Peptid- & HGH-Manufaktur",
@@ -87,7 +84,7 @@ const t = {
     about: "Über uns",
     contact: "Kontakt",
     cart: "Warenkorb",
-    checkout: "Zur Kasse",
+    checkout: "Zur Kasse via WhatsApp",
     total: "Gesamt",
     empty: "Ihr Warenkorb ist leer",
     addToCart: "In den Warenkorb",
@@ -107,10 +104,7 @@ const t = {
     contactTitle: "Kontaktieren Sie Uns",
     contactSub: "Unser Team steht für jegliche Rückfragen und Bestellungen bereit.",
     whatsappLabel: "WhatsApp Direkt-Chat",
-    emailLabel: "E-Mail-Adresse",
-    facilityMediaTitle: "Einblicke in Unsere Produktion & Reinräume",
-    photoPlaceholder: "Platzhalter für Produktionsfoto",
-    videoPlaceholder: "Platzhalter für Reinraum-Video"
+    facilityMediaTitle: "Einblicke in Unsere Produktion & Reinräume"
   }
 };
 
@@ -240,6 +234,19 @@ export default function App() {
 
   const removeFromCart = (id) => {
     setCart(prev => prev.filter(item => item.id !== id));
+  };
+
+  const handleWhatsAppCheckout = () => {
+    if (cart.length === 0) return;
+    let message = "Hello, I would like to buy the following products:\n\n";
+    cart.forEach((item, index) => {
+      message += `${index + 1}. ${item.name} (${item.specs}) - Qty: ${item.qty} - Price: $${item.price * item.qty}\n`;
+    });
+    message += `\nTotal: $${cartTotal}`;
+    
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/85244217796?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
@@ -407,6 +414,7 @@ export default function App() {
           </section>
         )}
 
+        {}
         <main id="catalog" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           {currentTab === 'about' ? (
             <div className="max-w-4xl mx-auto py-8">
@@ -429,52 +437,30 @@ export default function App() {
               </div>
 
               <div className="mb-8">
-  <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">{content.facilityMediaTitle}</h3>
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-    {/* Echtes Foto */}
-    <div className="rounded-2xl overflow-hidden shadow-lg aspect-video bg-slate-900">
-      <img 
-        src={logoJPEG} 
-        alt="Produktion bei Manufaktur" 
-        className="w-full h-full object-cover" 
-      />
-    </div>
-
-    {/* Echtes Video */}
-    <div className="rounded-2xl overflow-hidden shadow-lg aspect-video bg-slate-900">
-      <video 
-        className="w-full h-full object-cover" 
-        autoPlay 
-        loop 
-        muted 
-        playsInline
-      >
-        <source src={productionVID} type="video/mp4" />
-        Dein Browser unterstützt das Video-Tag nicht.
-      </video>
-    </div>
-  </div>
-</div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">{content.facilityMediaTitle}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-sm overflow-hidden">
+                    <img src={logoJPEG} alt="Manufaktur Facility" className="w-full h-56 object-cover rounded-xl mb-3 shadow" />
+                    <span className="text-slate-700 font-semibold text-sm">Manufaktur Facility & Logo</span>
+                  </div>
+                  <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-sm overflow-hidden">
+                    <video src={productionVID} autoPlay loop muted playsInline className="w-full h-56 object-cover rounded-xl mb-3 shadow" />
+                    <span className="text-slate-700 font-semibold text-sm">Cleanroom Synthesis & Production</span>
+                  </div>
+                </div>
+              </div>
             </div>
           ) : currentTab === 'contact' ? (
-            <div className="max-w-3xl mx-auto py-8">
+            <div className="max-w-xl mx-auto py-8">
               <div className="text-center mb-12">
                 <h1 className="text-4xl font-black text-slate-900 mb-4">{content.contactTitle}</h1>
                 <p className="text-lg text-slate-600">{content.contactSub}</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 flex flex-col items-center text-center">
-                  <div className="bg-green-50 p-4 rounded-full text-green-600 mb-4"><MessageSquare size={28} /></div>
-                  <h3 className="font-bold text-slate-900 mb-2">{content.whatsappLabel}</h3>
-                  <a href="https://wa.me/85244217796" target="_blank" rel="noopener noreferrer" className="text-green-600 font-semibold hover:underline">+852 4421 7796</a>
-                </div>
-
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 flex flex-col items-center text-center">
-                  <div className="bg-purple-50 p-4 rounded-full text-purple-600 mb-4"><Mail size={28} /></div>
-                  <h3 className="font-bold text-slate-900 mb-2">{content.emailLabel}</h3>
-                  <a href="mailto:contact@manufaktur-b2b.com" className="text-purple-600 font-semibold hover:underline">contact@manufaktur-b2b.com</a>
-                </div>
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 flex flex-col items-center text-center">
+                <div className="bg-green-50 p-4 rounded-full text-green-600 mb-4"><MessageSquare size={28} /></div>
+                <h3 className="font-bold text-slate-900 mb-2">{content.whatsappLabel}</h3>
+                <a href="https://wa.me/85244217796" target="_blank" rel="noopener noreferrer" className="text-green-600 font-semibold hover:underline text-lg">+852 4421 7796</a>
               </div>
             </div>
           ) : !activeProduct ? (
@@ -552,6 +538,7 @@ export default function App() {
         </main>
       </div>
 
+      {}
       <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center">
           <span className="text-xl font-bold text-white mb-2 md:mb-0">MANUFAKTUR</span>
@@ -584,7 +571,10 @@ export default function App() {
             {cart.length > 0 && (
               <div className="p-6 border-t bg-slate-50">
                 <div className="flex justify-between font-bold text-lg mb-4"><span>Total:</span><span>${cartTotal}</span></div>
-                <button className="w-full bg-blue-700 text-white py-3 rounded-lg font-bold">{content.checkout}</button>
+                <button onClick={handleWhatsAppCheckout} className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors shadow-lg">
+                  <MessageSquare size={20} />
+                  {content.checkout}
+                </button>
               </div>
             )}
           </div>
