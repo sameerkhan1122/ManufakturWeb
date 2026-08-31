@@ -160,6 +160,7 @@ export default function App() {
   const [lang, setLang] = useState('en'); // Default language set to English
   const [search, setSearch] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState('home');
   const searchRef = useRef(null);
 
@@ -200,6 +201,7 @@ export default function App() {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setIsSearchOpen(false);
+    setIsMobileSearchOpen(false);
     setActiveProduct(null);
     setCurrentTab('home');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -210,12 +212,14 @@ export default function App() {
     setActiveProduct(null);
     setCurrentTab('home');
     setSearch('');
+    setIsMobileSearchOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSelectProductFromDropdown = (group) => {
     setSearch('');
     setIsSearchOpen(false);
+    setIsMobileSearchOpen(false);
     setCurrentTab('home');
     setActiveProduct(group);
     setSelectedVariant(group.variants[0]);
@@ -259,14 +263,15 @@ export default function App() {
       <div>
         <nav className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-20 items-center gap-4">
-              <a href="#" onClick={handleLogoClick} className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+            <div className="flex justify-between h-20 items-center gap-2 sm:gap-4">
+              <a href="#" onClick={handleLogoClick} className="flex items-center gap-2 sm:gap-3 cursor-pointer hover:opacity-80 transition-opacity">
                 <div className="bg-blue-700 p-2 rounded-lg">
-                  <FlaskConical className="text-white" size={28} />
+                  <FlaskConical className="text-white" size={24} />
                 </div>
-                <span className="text-2xl font-black text-slate-900 tracking-tight">MANUFAKTUR</span>
+                <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">MANUFAKTUR</span>
               </a>
               
+              {/* Desktop Search Bar */}
               <div className="flex-1 max-w-md mx-4 hidden md:block relative" ref={searchRef}>
                 <form onSubmit={handleSearchSubmit} className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -316,6 +321,7 @@ export default function App() {
                 )}
               </div>
 
+              {/* Desktop Nav Items */}
               <div className="hidden md:flex items-center space-x-8">
                 <button 
                   onClick={() => { setActiveProduct(null); setCurrentTab('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
@@ -373,10 +379,17 @@ export default function App() {
                 </button>
               </div>
 
-              <div className="md:hidden flex items-center gap-4">
-                 <button 
+              {/* Mobile Header Controls */}
+              <div className="md:hidden flex items-center gap-2">
+                <button 
+                  onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+                  className="p-2 text-slate-600 hover:text-blue-700"
+                >
+                  <Search size={22} />
+                </button>
+                <button 
                   onClick={() => setIsCartOpen(true)}
-                  className="relative p-2 text-slate-600"
+                  className="relative p-2 text-slate-600 hover:text-blue-700"
                 >
                   <ShoppingCart size={24} />
                   {cartItemCount > 0 && (
@@ -385,25 +398,79 @@ export default function App() {
                     </span>
                   )}
                 </button>
-                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-slate-600">
-                  {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-slate-600">
+                  {isMobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
                 </button>
               </div>
             </div>
           </div>
+
+          {/* Expandable Mobile Search Bar */}
+          {isMobileSearchOpen && (
+            <div className="md:hidden px-4 pb-4 bg-white border-b border-slate-100">
+              <form onSubmit={handleSearchSubmit} className="relative">
+                <input
+                  type="text"
+                  placeholder={content.search}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-full text-sm bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-700"
+                />
+                <Search size={18} className="absolute left-3 top-2.5 text-slate-400" />
+              </form>
+            </div>
+          )}
+
+          {/* Mobile Dropdown Menu */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 space-y-4 shadow-lg">
+              <button 
+                onClick={() => { setActiveProduct(null); setCurrentTab('home'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                className={`block w-full text-left font-medium py-2 ${currentTab === 'home' && !activeProduct ? 'text-blue-700 font-bold' : 'text-slate-700'}`}
+              >
+                {content.shop}
+              </button>
+              <button 
+                onClick={() => { setActiveProduct(null); setCurrentTab('about'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                className={`block w-full text-left font-medium py-2 ${currentTab === 'about' ? 'text-blue-700 font-bold' : 'text-slate-700'}`}
+              >
+                {content.about}
+              </button>
+              <button 
+                onClick={() => { setActiveProduct(null); setCurrentTab('contact'); setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                className={`block w-full text-left font-medium py-2 ${currentTab === 'contact' ? 'text-blue-700 font-bold' : 'text-slate-700'}`}
+              >
+                {content.contact}
+              </button>
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                <span className="text-sm font-medium text-slate-500">Language</span>
+                <div className="flex gap-2">
+                  {Object.keys(t).map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => { setLang(l); setIsMobileMenuOpen(false); }}
+                      className={`px-3 py-1 text-sm rounded ${lang === l ? 'bg-blue-700 text-white font-bold' : 'bg-slate-100 text-slate-700'}`}
+                    >
+                      {l.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </nav>
 
         {currentTab === 'home' && !activeProduct && !search.trim() && (
-          <section className="bg-slate-900 text-white py-20 relative overflow-hidden">
+          <section className="bg-slate-900 text-white py-16 sm:py-20 relative overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
               <div className="text-center md:text-left max-w-3xl">
-                <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight tracking-tight">
+                <h1 className="text-3xl sm:text-5xl md:text-6xl font-black mb-6 leading-tight tracking-tight">
                   {content.hero}
                 </h1>
-                <p className="text-lg md:text-xl text-slate-300 mb-8">
+                <p className="text-base sm:text-xl text-slate-300 mb-8">
                   {content.subhero}
                 </p>
-                <div className="flex gap-4 justify-center md:justify-start">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                   <a href="#catalog" className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-lg transition-colors text-center shadow-lg">
                     {content.shop}
                   </a>
@@ -416,29 +483,29 @@ export default function App() {
           </section>
         )}
 
-        <main id="catalog" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <main id="catalog" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           {currentTab === 'about' ? (
             <div className="max-w-4xl mx-auto py-8">
               <div className="text-center mb-12">
-                <h1 className="text-4xl font-black text-slate-900 mb-4">{content.aboutTitle}</h1>
-                <p className="text-lg text-slate-600 max-w-2xl mx-auto">{content.aboutText1}</p>
+                <h1 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4">{content.aboutTitle}</h1>
+                <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto">{content.aboutText1}</p>
               </div>
 
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 md:p-12 mb-12">
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-12 mb-12">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="bg-blue-100 p-3 rounded-xl text-blue-700">
-                    <Building2 size={32} />
+                    <Building2 size={28} />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-slate-900">Direct Expansion into Europe</h2>
-                    <p className="text-sm text-slate-500">From South America to the global market</p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Direct Expansion into Europe</h2>
+                    <p className="text-xs sm:text-sm text-slate-500">From South America to the global market</p>
                   </div>
                 </div>
-                <p className="text-slate-700 text-lg leading-relaxed mb-6">{content.aboutText2}</p>
+                <p className="text-slate-700 text-base sm:text-lg leading-relaxed mb-6">{content.aboutText2}</p>
               </div>
 
               <div className="mb-8">
-                <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">{content.facilityMediaTitle}</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6 text-center">{content.facilityMediaTitle}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-sm overflow-hidden">
                     <img src={logoJPEG} alt="Manufaktur Facility" className="w-full h-56 object-cover rounded-xl mb-3 shadow" />
@@ -454,8 +521,8 @@ export default function App() {
           ) : currentTab === 'contact' ? (
             <div className="max-w-xl mx-auto py-8">
               <div className="text-center mb-12">
-                <h1 className="text-4xl font-black text-slate-900 mb-4">{content.contactTitle}</h1>
-                <p className="text-lg text-slate-600">{content.contactSub}</p>
+                <h1 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4">{content.contactTitle}</h1>
+                <p className="text-base sm:text-lg text-slate-600">{content.contactSub}</p>
               </div>
 
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 flex flex-col items-center text-center">
@@ -466,8 +533,8 @@ export default function App() {
             </div>
           ) : !activeProduct ? (
             <>
-              <div className="flex items-center justify-between mb-10">
-                <h2 className="text-3xl font-bold text-slate-900">{content.shop}</h2>
+              <div className="flex items-center justify-between mb-8 sm:mb-10">
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">{content.shop}</h2>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -494,28 +561,28 @@ export default function App() {
             </>
           ) : (
             <>
-              <div className="mb-8">
-                <button onClick={() => setActiveProduct(null)} className="inline-flex items-center gap-2 text-white font-bold bg-blue-700 hover:bg-blue-800 px-6 py-3 rounded-full transition-all shadow-md">
-                  <ArrowLeft size={20} />
+              <div className="mb-6 sm:mb-8">
+                <button onClick={() => setActiveProduct(null)} className="inline-flex items-center gap-2 text-white font-bold bg-blue-700 hover:bg-blue-800 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full transition-all shadow-md text-sm sm:text-base">
+                  <ArrowLeft size={18} />
                   {content.backToCatalog}
                 </button>
               </div>
 
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col md:flex-row">
-                <div className="md:w-1/2 bg-slate-50 p-8 md:p-12 flex items-center justify-center border-b md:border-b-0 md:border-r border-slate-200">
+                <div className="md:w-1/2 bg-slate-50 p-6 sm:p-12 flex items-center justify-center border-b md:border-b-0 md:border-r border-slate-200">
                   <div className="w-full max-w-sm"><VialGraphic name={activeProduct.name} size="lg" /></div>
                 </div>
-                <div className="md:w-1/2 p-8 md:p-10 flex flex-col">
+                <div className="md:w-1/2 p-6 sm:p-10 flex flex-col">
                   <div className="uppercase tracking-wide text-xs font-bold text-blue-700 mb-2">{activeProduct.category}</div>
-                  <h2 className="text-3xl font-extrabold text-slate-900 mb-2">{activeProduct.name}</h2>
-                  <p className="text-slate-500 mb-8">{content.disclaimer}</p>
-                  <div className="mb-8">
-                    <h3 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wider">{content.dosage}</h3>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">{activeProduct.name}</h2>
+                  <p className="text-slate-500 text-sm sm:text-base mb-6 sm:mb-8">{content.disclaimer}</p>
+                  <div className="mb-6 sm:mb-8">
+                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 mb-3 uppercase tracking-wider">{content.dosage}</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {activeProduct.variants.map(variant => (
                         <button key={variant.id} onClick={() => setSelectedVariant(variant)} className={`text-left p-3 rounded-lg border-2 transition-all ${selectedVariant?.id === variant.id ? 'border-blue-700 bg-blue-50' : 'border-slate-200'}`}>
-                          <div className="font-semibold text-slate-900">{variant.specs.split('*')[0].trim()}</div>
-                          <div className="text-sm text-slate-500 mt-1 flex justify-between">
+                          <div className="font-semibold text-slate-900 text-sm sm:text-base">{variant.specs.split('*')[0].trim()}</div>
+                          <div className="text-xs sm:text-sm text-slate-500 mt-1 flex justify-between">
                             <span>{variant.specs.split('*')[1]?.trim() || variant.specs}</span>
                             <span className="font-bold text-blue-700">${variant.price}</span>
                           </div>
@@ -525,7 +592,7 @@ export default function App() {
                   </div>
                   <div className="mt-auto pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-end sm:items-center gap-6">
                     <div className="w-full sm:flex-1">
-                      <div className="text-sm text-slate-500 mb-1">{content.total}: <span className="font-bold text-xl text-slate-900">${(selectedVariant?.price || 0) * selectedQuantity}</span></div>
+                      <div className="text-sm text-slate-500 mb-2">{content.total}: <span className="font-bold text-xl text-slate-900">${(selectedVariant?.price || 0) * selectedQuantity}</span></div>
                       <button onClick={() => addToCart(selectedVariant, selectedQuantity)} className="w-full flex items-center justify-center gap-2 bg-blue-700 text-white px-6 py-3 rounded-md font-bold hover:bg-blue-800 transition-colors">
                         <ShoppingCart size={20} />
                         {content.addToCart}
@@ -539,10 +606,10 @@ export default function App() {
         </main>
       </div>
 
-      <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center">
-          <span className="text-xl font-bold text-white mb-2 md:mb-0">MANUFAKTUR</span>
-          <p className="text-sm">© {new Date().getFullYear()} Manufaktur B2B. {content.rights}</p>
+      <footer className="bg-slate-900 text-slate-400 py-10 sm:py-12 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
+          <span className="text-xl font-bold text-white">MANUFAKTUR</span>
+          <p className="text-xs sm:text-sm">© {new Date().getFullYear()} Manufaktur B2B. {content.rights}</p>
         </div>
       </footer>
 
@@ -550,28 +617,28 @@ export default function App() {
         <div className="fixed inset-0 z-50 overflow-hidden">
           <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setIsCartOpen(false)} />
           <div className="fixed inset-y-0 right-0 max-w-md w-full bg-white shadow-2xl flex flex-col">
-            <div className="p-6 border-b flex items-center justify-between">
-              <h2 className="text-xl font-bold">{content.cart} ({cartItemCount})</h2>
+            <div className="p-5 sm:p-6 border-b flex items-center justify-between">
+              <h2 className="text-lg sm:text-xl font-bold">{content.cart} ({cartItemCount})</h2>
               <button onClick={() => setIsCartOpen(false)}><X size={20} /></button>
             </div>
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
               {cart.map(item => (
                 <div key={item.id} className="flex justify-between items-center border-b pb-4">
                   <div>
-                    <h4 className="font-bold">{item.name}</h4>
-                    <p className="text-sm text-slate-500">{item.specs} x {item.qty}</p>
+                    <h4 className="font-bold text-sm sm:text-base">{item.name}</h4>
+                    <p className="text-xs sm:text-sm text-slate-500">{item.specs} x {item.qty}</p>
                   </div>
                   <div className="text-right">
-                    <span className="font-bold">${item.price * item.qty}</span>
+                    <span className="font-bold text-sm sm:text-base">${item.price * item.qty}</span>
                     <button onClick={() => removeFromCart(item.id)} className="block text-xs text-red-500 mt-1">{content.remove}</button>
                   </div>
                 </div>
               ))}
             </div>
             {cart.length > 0 && (
-              <div className="p-6 border-t bg-slate-50">
-                <div className="flex justify-between font-bold text-lg mb-4"><span>Total:</span><span>${cartTotal}</span></div>
-                <button onClick={handleWhatsAppCheckout} className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors shadow-lg">
+              <div className="p-5 sm:p-6 border-t bg-slate-50">
+                <div className="flex justify-between font-bold text-base sm:text-lg mb-4"><span>Total:</span><span>${cartTotal}</span></div>
+                <button onClick={handleWhatsAppCheckout} className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors shadow-lg text-sm sm:text-base">
                   <MessageSquare size={20} />
                   {content.checkout}
                 </button>
