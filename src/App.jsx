@@ -75,7 +75,8 @@ const t = {
     contactTitle: "Get in Touch With Us",
     contactSub: "Our team is ready to assist you with any inquiries and orders.",
     whatsappLabel: "WhatsApp Direct Chat",
-    facilityMediaTitle: "Inside Our Facility: Production & Cleanrooms"
+    facilityMediaTitle: "Inside Our Facility: Production & Cleanrooms",
+    remove: "Remove"
   },
   de: {
     hero: "Direkte Peptid- & HGH-Manufaktur",
@@ -104,7 +105,8 @@ const t = {
     contactTitle: "Kontaktieren Sie Uns",
     contactSub: "Unser Team steht für jegliche Rückfragen und Bestellungen bereit.",
     whatsappLabel: "WhatsApp Direkt-Chat",
-    facilityMediaTitle: "Einblicke in Unsere Produktion & Reinräume"
+    facilityMediaTitle: "Einblicke in Unsere Produktion & Reinräume",
+    remove: "Entfernen"
   }
 };
 
@@ -155,7 +157,7 @@ const VialGraphic = ({ name, size = "md" }) => {
 };
 
 export default function App() {
-  const [lang, setLang] = useState('de');
+  const [lang, setLang] = useState('en'); // Default language set to English
   const [search, setSearch] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState('home');
@@ -307,7 +309,7 @@ export default function App() {
                       </ul>
                     ) : (
                       <div className="p-4 text-center text-slate-500 text-sm">
-                        Keine Ergebnisse
+                        No results found
                       </div>
                     )}
                   </div>
@@ -414,7 +416,6 @@ export default function App() {
           </section>
         )}
 
-        {}
         <main id="catalog" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           {currentTab === 'about' ? (
             <div className="max-w-4xl mx-auto py-8">
@@ -429,8 +430,8 @@ export default function App() {
                     <Building2 size={32} />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-slate-900">Direkte Expansion nach Europa</h2>
-                    <p className="text-sm text-slate-500">Von Südamerika auf den globalen Markt</p>
+                    <h2 className="text-2xl font-bold text-slate-900">Direct Expansion into Europe</h2>
+                    <p className="text-sm text-slate-500">From South America to the global market</p>
                   </div>
                 </div>
                 <p className="text-slate-700 text-lg leading-relaxed mb-6">{content.aboutText2}</p>
@@ -538,7 +539,6 @@ export default function App() {
         </main>
       </div>
 
-      {}
       <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center">
           <span className="text-xl font-bold text-white mb-2 md:mb-0">MANUFAKTUR</span>
@@ -563,7 +563,7 @@ export default function App() {
                   </div>
                   <div className="text-right">
                     <span className="font-bold">${item.price * item.qty}</span>
-                    <button onClick={() => removeFromCart(item.id)} className="block text-xs text-red-500 mt-1">Entfernen</button>
+                    <button onClick={() => removeFromCart(item.id)} className="block text-xs text-red-500 mt-1">{content.remove}</button>
                   </div>
                 </div>
               ))}
