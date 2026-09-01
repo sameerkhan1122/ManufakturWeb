@@ -142,10 +142,10 @@ const allProducts = [
   { id: 'cnd5', name: 'CND5 - CJC 1295 NO DAC (5mg/vial*10 vials)', price: 74, category: 'CJC 1295 NO DAC' },
   { id: 'cnd10', name: 'CND10 - CJC 1295 NO DAC (10mg/vial*10 vials)', price: 132, category: 'CJC 1295 NO DAC' },
   
-  { id: 'bb10', name: 'BB10 - Blend: BPC157 5mg + TB500 5mg', price: 96, category: 'BB (BPC157 + TB500)' },
-  { id: 'bb20', name: 'BB20 - Blend: BPC157 10mg + TB500 10mg', price: 169, category: 'BB (BPC157 + TB500)' },
+  { id: 'bb10', name: 'BB10 - Blend: BPC157 5mg + TB500 5mg', price: 96, category: 'Wolverine (BPC157 + TB500)' },
+  { id: 'bb20', name: 'BB20 - Blend: BPC157 10mg + TB500 10mg', price: 169, category: 'Wolverine (BPC157 + TB500)' },
   { id: 'cp10', name: 'CP10 - Blend: CJC1295 NO DAC 5mg + Ipamorelin 5mg', price: 103, category: 'CP (CJC1295 NO DAC + Ipamorelin)' },
-  { id: 'bbg70', name: 'BBG70 - Blend: BPC 157 10mg + TB500 10mg + GHK-CU 50mg', price: 180, category: 'BBG (BPC157 + TB500 + GHK-CU)' },
+  { id: 'bbg70', name: 'BBG70 - Blend: BPC 157 10mg + TB500 10mg + GHK-CU 50mg', price: 180, category: 'GLOW (BPC157 + TB500 + GHK-CU)' },
   { id: 'klow80', name: 'KLOW80 - Blend: BPC 157 10mg + TB500 10mg + GHK-CU 50mg + KPV 10mg', price: 210, category: 'KLOW (BPC157 + TB500 + GHK-CU + KPV)', image: img_KLOW },
   { id: 'cs10', name: 'CS10 - Cagrilintide 5mg + Semaglutide 5mg', price: 162, category: 'CS (Cagrilintide + Semaglutide)' },
   
@@ -241,7 +241,6 @@ const allProducts = [
 
 function ProductGroupCard({ groupName, products, onClick }) {
   const startingPrice = Math.min(...products.map(p => p.price));
-  // Sucht dynamisch nach dem ersten Bild innerhalb dieser Gruppe
   const groupImage = products.find(p => p.image)?.image;
   
   return (
@@ -291,11 +290,16 @@ export default function App() {
   const [detailQuantity, setDetailQuantity] = useState(1);
 
   const searchContainerRef = useRef(null);
+  const mobileSearchContainerRef = useRef(null); // NEU: Für mobile Klick-Outside Logik
   const categoriesList = [...new Set(allProducts.map(p => p.category))];
 
+  // Schließt das Dropdown, wenn man woanders hin klickt (Desktop & Mobile)
   useEffect(() => {
     function handleClickOutside(event) {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+      const isOutsideDesktop = !searchContainerRef.current || !searchContainerRef.current.contains(event.target);
+      const isOutsideMobile = !mobileSearchContainerRef.current || !mobileSearchContainerRef.current.contains(event.target);
+      
+      if (isOutsideDesktop && isOutsideMobile) {
         setShowSearchDropdown(false);
       }
     }
@@ -313,7 +317,11 @@ export default function App() {
     }
     setDetailQuantity(1); 
     setActiveTab('productDetail');
+    
+    // UI sauber schließen nach einem Klick (wichtig für Mobile)
     setShowSearchDropdown(false); 
+    setMobileSearchOpen(false);
+    setMobileMenuOpen(false);
     window.scrollTo(0, 0); 
   };
 
@@ -322,6 +330,7 @@ export default function App() {
     if (searchQuery.trim().length > 0) {
       setActiveTab('searchResults');
       setShowSearchDropdown(false);
+      setMobileSearchOpen(false); // Mobile Suchleiste nach Submit einklappen
     }
   };
 
@@ -354,7 +363,7 @@ export default function App() {
   const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   const handleWhatsAppCheckout = () => {
-    const phone = "4915200000000";
+    const phone = "85244217796";
     let message = "Hello, I would like to purchase the following products:\n\n";
     cart.forEach((item, index) => {
       message += `${index + 1}. ${item.name} - Quantity: ${item.quantity} kit(s) - Price: $${item.price * item.quantity}\n`;
@@ -363,6 +372,43 @@ export default function App() {
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
+
+  // NEU: Wiederverwendbare Komponente für das Such-Dropdown (verhindert doppelten Code für Desktop/Mobile)
+  const renderSearchDropdown = () => (
+    <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden z-50 max-h-80 overflow-y-auto">
+      {dropdownSearchResults.length === 0 ? (
+        <div className="p-4 text-center text-sm text-slate-400">No products found. Press Enter to search anyway.</div>
+      ) : (
+        <div>
+          {dropdownSearchResults.slice(0, 8).map((product) => (
+            <div 
+              key={product.id}
+              onClick={() => handleGroupClick(product.category, product.id)}
+              className="px-5 py-3 hover:bg-slate-800 cursor-pointer flex justify-between items-center border-b border-slate-800/50 last:border-0 transition-colors"
+            >
+              <div className="pr-4">
+                <p className="text-sm font-semibold text-slate-200 truncate">{product.name}</p>
+                <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest mt-0.5">{product.category}</p>
+              </div>
+              <span className="text-sm font-black text-white shrink-0">${product.price}</span>
+            </div>
+          ))}
+          {dropdownSearchResults.length > 8 && (
+            <div 
+              onClick={() => { 
+                setActiveTab('searchResults'); 
+                setShowSearchDropdown(false);
+                setMobileSearchOpen(false); 
+              }}
+              className="p-3 bg-slate-950 text-center text-xs font-bold text-cyan-400 hover:text-cyan-300 cursor-pointer uppercase tracking-widest"
+            >
+              View All {dropdownSearchResults.length} Results &rarr;
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500 selection:text-black">
@@ -416,38 +462,8 @@ export default function App() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
               </button>
             </form>
-
-            {showSearchDropdown && searchQuery.trim().length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden z-50 max-h-96 overflow-y-auto">
-                {dropdownSearchResults.length === 0 ? (
-                  <div className="p-4 text-center text-sm text-slate-400">No products found. Press Enter to search anyway.</div>
-                ) : (
-                  <div>
-                    {dropdownSearchResults.slice(0, 8).map((product) => (
-                      <div 
-                        key={product.id}
-                        onClick={() => handleGroupClick(product.category, product.id)}
-                        className="px-5 py-3 hover:bg-slate-800 cursor-pointer flex justify-between items-center border-b border-slate-800/50 last:border-0 transition-colors"
-                      >
-                        <div className="pr-4">
-                          <p className="text-sm font-semibold text-slate-200 truncate">{product.name}</p>
-                          <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest mt-0.5">{product.category}</p>
-                        </div>
-                        <span className="text-sm font-black text-white shrink-0">${product.price}</span>
-                      </div>
-                    ))}
-                    {dropdownSearchResults.length > 8 && (
-                      <div 
-                        onClick={() => { setActiveTab('searchResults'); setShowSearchDropdown(false); }}
-                        className="p-3 bg-slate-950 text-center text-xs font-bold text-cyan-400 hover:text-cyan-300 cursor-pointer uppercase tracking-widest"
-                      >
-                        View All {dropdownSearchResults.length} Results &rarr;
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Desktop Dropdown rendern */}
+            {showSearchDropdown && searchQuery.trim().length > 0 && renderSearchDropdown()}
           </div>
 
           <div className="flex items-center justify-end gap-3 shrink-0">
@@ -474,20 +490,30 @@ export default function App() {
           </div>
         </div>
 
+        {/* MOBILE SUCHLEISTE (Jetzt mit Dropdown) */}
         {mobileSearchOpen && (
-          <div className="lg:hidden px-4 pb-4 pt-2 border-t border-slate-800 bg-slate-900 relative">
-            <form onSubmit={(e) => { e.preventDefault(); setActiveTab('searchResults'); setMobileSearchOpen(false); }} className="w-full relative">
-              <input 
-                type="text" 
-                placeholder="Search products..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 pl-4 pr-12 text-sm text-slate-200 focus:outline-none focus:border-cyan-500"
-              />
-              <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-              </button>
-            </form>
+          <div className="lg:hidden px-4 pb-4 pt-2 border-t border-slate-800 bg-slate-900" ref={mobileSearchContainerRef}>
+            <div className="w-full relative">
+              <form onSubmit={handleSearchSubmit} className="w-full relative">
+                <input 
+                  type="text" 
+                  placeholder="Search products..." 
+                  value={searchQuery}
+                  onFocus={() => setShowSearchDropdown(true)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowSearchDropdown(true);
+                  }}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 pl-4 pr-12 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 shadow-inner"
+                />
+                <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </button>
+              </form>
+              
+              {/* Mobile Dropdown rendern */}
+              {showSearchDropdown && searchQuery.trim().length > 0 && renderSearchDropdown()}
+            </div>
           </div>
         )}
 
@@ -717,7 +743,7 @@ export default function App() {
                 <h3 className="text-lg font-bold">WhatsApp Support</h3>
                 <p className="text-slate-400 text-sm mt-1">Fast, reliable responses directly from our support desk.</p>
               </div>
-              <a href="https://wa.me/4915200000000" target="_blank" rel="noopener noreferrer" className="inline-block w-full py-3.5 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)]">
+              <a href="https://wa.me/85244217796" target="_blank" rel="noopener noreferrer" className="inline-block w-full py-3.5 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)]">
                 Open WhatsApp Chat
               </a>
             </div>
